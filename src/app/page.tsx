@@ -2,48 +2,26 @@
 
 import { Advocate } from "@/model/advocate.model";
 import { ChangeEvent, useEffect, useState } from "react";
+import { AdvocateFilters } from "./api/advocates/advocate-filters";
 
 export default function Home() {
-  const [advocates, setAdvocates] = useState<Advocate[]>([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState<AdvocateFilters>({
+    name: "",
+    location: "",
+    specialty: "",
+    experience: "",
+  });
 
-  useEffect(() => {
-    console.log("fetching advocates...");
-    fetch("/api/advocates").then((response) => {
-      response.json().then((jsonResponse) => {
-        setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
-      });
-    });
-  }, []);
+  const advocates = useAdvocates(filters);
 
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value;
+  const onFilter =
+    (key: keyof AdvocateFilters) => (e: ChangeEvent<HTMLInputElement>) => {
+      const searchTerm = e.target.value;
+      setFilters((filters) => ({ ...filters, [key]: searchTerm }));
+    };
 
-    setSearchTerm(searchTerm);
-
-    console.log("filtering advocates...");
-    const filteredAdvocates = advocates.filter((advocate) => {
-      return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
-        advocate.specialties.some((specialty) =>
-          specialty.includes(searchTerm)
-        ) ||
-        advocate.yearsOfExperience.toString().includes(searchTerm)
-      );
-    });
-
-    setFilteredAdvocates(filteredAdvocates);
-  };
-
-  const onClick = () => {
-    console.log(advocates);
-    setFilteredAdvocates(advocates);
-    setSearchTerm("");
+  const onClearFilter = (key: keyof AdvocateFilters) => () => {
+    setFilters((filters) => ({ ...filters, [key]: "" }));
   };
 
   return (
@@ -51,22 +29,11 @@ export default function Home() {
       <h1>Solace Advocates</h1>
       <br />
       <br />
-      <div>
-        <p>Search</p>
-        <p>
-          Searching for: <span id="search-term">{searchTerm}</span>
-        </p>
-        <input style={{ border: "1px solid black" }} onChange={onChange} />
-        <button onClick={onClick}>Reset Search</button>
-      </div>
-      <br />
-      <br />
       <table>
         <thead>
           <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>City</th>
+            <th>Name</th>
+            <th>Location</th>
             <th>Degree</th>
             <th>Specialties</th>
             <th>Years of Experience</th>
@@ -74,11 +41,38 @@ export default function Home() {
           </tr>
         </thead>
         <tbody>
-          {filteredAdvocates.map((advocate) => {
+          <tr>
+            <td>
+              <input onChange={onFilter("name")} />
+              {filters.name.length > 0 && (
+                <button onClick={onClearFilter("name")}>X</button>
+              )}
+            </td>
+            <td>
+              <input onChange={onFilter("location")} />
+              {filters.location.length > 0 && (
+                <button onClick={onClearFilter("location")}>X</button>
+              )}
+            </td>
+            <td />
+            <td>
+              <input onChange={onFilter("specialty")} />
+              {filters.location.length > 0 && (
+                <button onClick={onClearFilter("specialty")}>X</button>
+              )}
+            </td>
+            <td>
+              <input onChange={onFilter("experience")} />
+              {filters.location.length > 0 && (
+                <button onClick={onClearFilter("experience")}>X</button>
+              )}
+            </td>
+            <td />
+          </tr>
+          {advocates.map((advocate) => {
             return (
               <tr key={advocate.phoneNumber}>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
+                <td>{getAdvocateName(advocate)}</td>
                 <td>{advocate.city}</td>
                 <td>{advocate.degree}</td>
                 <td>
@@ -95,4 +89,23 @@ export default function Home() {
       </table>
     </main>
   );
+}
+
+function useAdvocates(filters: AdvocateFilters): Advocate[] {
+  const [advocates, setAdvocates] = useState<Advocate[]>([]);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(filters);
+    fetch(`/api/advocates?${searchParams}`).then((response) => {
+      response.json().then((jsonResponse) => {
+        setAdvocates(jsonResponse.data);
+      });
+    });
+  }, [filters]);
+
+  return advocates;
+}
+
+function getAdvocateName(advocate: Advocate): string {
+  return [advocate.firstName, advocate.lastName].join(" ");
 }
