@@ -43,26 +43,32 @@ export default function Home() {
         <tbody>
           <tr>
             <td>
-              <input onChange={onFilter("name")} />
+              <input onChange={onFilter("name")} value={filters.name} />
               {filters.name.length > 0 && (
                 <button onClick={onClearFilter("name")}>X</button>
               )}
             </td>
             <td>
-              <input onChange={onFilter("location")} />
+              <input onChange={onFilter("location")} value={filters.location} />
               {filters.location.length > 0 && (
                 <button onClick={onClearFilter("location")}>X</button>
               )}
             </td>
             <td />
             <td>
-              <input onChange={onFilter("specialty")} />
+              <input
+                onChange={onFilter("specialty")}
+                value={filters.specialty}
+              />
               {filters.specialty.length > 0 && (
                 <button onClick={onClearFilter("specialty")}>X</button>
               )}
             </td>
             <td>
-              <input onChange={onFilter("experience")} />
+              <input
+                onChange={onFilter("experience")}
+                value={filters.experience}
+              />
               {filters.experience.length > 0 && (
                 <button onClick={onClearFilter("experience")}>X</button>
               )}
