@@ -57,13 +57,13 @@ export default function Home() {
             <td />
             <td>
               <input onChange={onFilter("specialty")} />
-              {filters.location.length > 0 && (
+              {filters.specialty.length > 0 && (
                 <button onClick={onClearFilter("specialty")}>X</button>
               )}
             </td>
             <td>
               <input onChange={onFilter("experience")} />
-              {filters.location.length > 0 && (
+              {filters.experience.length > 0 && (
                 <button onClick={onClearFilter("experience")}>X</button>
               )}
             </td>
